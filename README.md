@@ -1,4 +1,3 @@
-```markdown
 # success-on-timeout
 
 Run one or more commands with a time cap in GitHub Actions. If the command **times out**, this action **treats it as success** (exits `0`). If the command **fails before** the time cap, the action **fails** with the command’s exit code.
