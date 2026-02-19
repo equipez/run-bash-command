@@ -1,0 +1,75 @@
+name: "Success on Timeout"
+description: "Run commands with a time cap; if the cap is reached, terminate the command and return success (exit 0)."
+author: "L'Équipe Z (equipez)"
+
+branding:
+  icon: "clock"
+  color: "blue"
+
+inputs:
+  time:
+    description: "Time limit passed to (g)timeout (e.g., 300s, 45m, 2h)."
+    required: true
+
+  command:
+    description: "Command(s) to run (multiline supported)."
+    required: true
+
+  signal:
+    description: "Signal sent when the time limit is reached."
+    required: false
+    default: "TERM"
+
+  kill-after:
+    description: "Delay before SIGKILL after sending --signal (e.g., 30s)."
+    required: false
+    default: "30s"
+
+  working-directory:
+    description: "Working directory for running the command(s)."
+    required: false
+    default: ""
+
+  install-coreutils:
+    description: "On macOS, install coreutils to provide gtimeout if missing."
+    required: false
+    default: "true"
+
+  quiet:
+    description: "If true, reduce log output."
+    required: false
+    default: "false"
+
+outputs:
+  timed_out:
+    description: "true if the command hit the time limit (and was treated as success)."
+    value: ${{ steps.sot.outputs.timed_out }}
+  exit_code:
+    description: "The underlying command exit code (124 means timeout in coreutils semantics)."
+    value: ${{ steps.sot.outputs.exit_code }}
+
+runs:
+  using: "composite"
+  steps:
+    - name: Ensure gtimeout exists (macOS)
+      if: runner.os == 'macOS' && inputs.install-coreutils == 'true'
+      shell: bash
+      run: |
+        set -Eeuo pipefail
+        if ! command -v gtimeout >/dev/null 2>&1; then
+          export HOMEBREW_NO_AUTO_UPDATE=1
+          brew install coreutils
+        fi
+
+    - id: sot
+      name: Run with (g)timeout; timeout => success
+      shell: bash
+      env:
+        INPUT_TIME: ${{ inputs.time }}
+        INPUT_COMMAND: ${{ inputs.command }}
+        INPUT_SIGNAL: ${{ inputs.signal }}
+        INPUT_KILL_AFTER: ${{ inputs.kill-after }}
+        INPUT_WORKING_DIRECTORY: ${{ inputs.working-directory }}
+        INPUT_QUIET: ${{ inputs.quiet }}
+      run: |
+        bash "${{ github.action_path }}/run.sh"
