@@ -141,4 +141,3 @@ If you set `install-coreutils: false`, ensure `gtimeout` is already available on
 ## License
 
 See `LICENSE.txt`.
-```
