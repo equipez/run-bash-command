@@ -4,6 +4,8 @@ Run one or more commands with a time cap in GitHub Actions. If the command **tim
 
 This is useful for long-running stress tests where “ran long enough without crashing” is considered a pass.
 
+**Vibe-coded, use at your own risk!!!**
+
 ## Why this exists
 
 GitHub-hosted runners have a hard job timeout (commonly 6 hours). When the runner kills a job for timeout, the workflow is marked failed and cannot be “fixed” afterward. The practical approach is to end the long-running command **before** the job limit and convert “timeout reached” into a successful outcome.
